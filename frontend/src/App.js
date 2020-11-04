@@ -17,18 +17,16 @@ class App extends Component{
     let access_token_spotify = queryString.parse(window.location.search).access_token_spotify || null;
     let access_token_google = queryString.parse(window.location.search).access_token_google ||  null;
 
-    if(access_token_google || access_token_spotify)
-    window.location = 'http://localhost:3000';
-    
-    
     if(access_token_spotify!= null)
     {
-      localStorage.setItem('spotify_token',access_token_spotify) 
+      localStorage.setItem('spotify_token',access_token_spotify);
+      window.location = 'http://localhost:3000';
     }
 
     if(access_token_google!=null)
     {
-      localStorage.setItem('google_token',access_token_google)
+      localStorage.setItem('google_token',access_token_google);
+      window.location = 'http://localhost:3000';
     }
 
     let storedSpotifyToken = localStorage.getItem('spotify_token');
@@ -38,7 +36,7 @@ class App extends Component{
     if(storedSpotifyToken)
     {
       
-     console.log("Spotify token :" + storedSpotifyToken); 
+     //console.log("Spotify token :" + storedSpotifyToken); 
 
      try{
             fetch("https://api.spotify.com/v1/me",
@@ -77,18 +75,31 @@ class App extends Component{
     
     if(storedGoogleToken)
     {
-      console.log("Google token : " + storedGoogleToken);
+      //console.log("Google token : " + storedGoogleToken);
 
       try{
+
+        let nextToken = '';
+        //while(nextToken != null)
           fetch("https://youtube.googleapis.com/youtube/v3/playlists?" + 
             queryString.stringify({
               part : 'snippet',
               mine : true,
-              pageToken : 'CAUQAA'
+              //pageToken : nextToken
             }),
             {headers : {'Authorization' : ' Bearer '+ storedGoogleToken}})
           .then(response => response.json())
-          .then(data => console.log(data));
+          .then(data => 
+            {console.log(data)
+              
+
+
+            
+            
+            
+            });
+
+          
       }
       catch(error)
       {
