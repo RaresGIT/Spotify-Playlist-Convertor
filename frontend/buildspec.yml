@@ -15,4 +15,9 @@ phases:
       - npm test
       - echo Building...
       - npm build
-      
+
+artifacts:
+  files:
+    -"**/*"
+  discard-paths: no
+  base-directory: dist
