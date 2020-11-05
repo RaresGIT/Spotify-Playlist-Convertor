@@ -1,9 +1,11 @@
 import React from 'react';
 import { render, screen,cleanup, fireEvent } from 'react-dom';
 import App from './App';
-import { act } from 'react-dom/test-utils';
+
+import {act} from 'react-dom/test-utils';
 
 
+process.env.CI=true;
 //afterEach(cleanup);
 
 //jest.mock("./")
@@ -13,10 +15,9 @@ it("should render app", () => {
 
 
   act(() =>{
-
     render(
-    <App></App>,container
-  ) 
+      <App/>,container
+    ) 
   })
 
   const loginSpotifyButton = container.querySelector('[href="localhost:8888/login"]');

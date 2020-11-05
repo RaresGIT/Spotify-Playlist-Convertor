@@ -9,6 +9,10 @@ trigger:
 pool:
   vmImage: 'ubuntu-latest'
 
+variables:
+  -name: CI
+   value: True
+
 steps:
 - task: NodeTool@0
   inputs:
@@ -18,8 +22,6 @@ steps:
 - script: |
     cd frontend
     npm install
-    npm test
-    apt get xdotool
-    xdotool key Q
+    CI=true npm test
     npm run build
   displayName: 'npm install and build'
