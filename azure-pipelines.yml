@@ -9,10 +9,6 @@ trigger:
 pool:
   vmImage: 'ubuntu-latest'
 
-variables:
-  -name: CI
-   value: True
-
 steps:
 - task: NodeTool@0
   inputs:
