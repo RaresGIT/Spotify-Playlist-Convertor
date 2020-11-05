@@ -7,17 +7,15 @@ import { act } from 'react-dom/test-utils';
 //afterEach(cleanup);
 
 //jest.mock("./")
-
-
-
 it("should render app", () => {
   let container = document.createElement('div');
   document.body.appendChild(container);
 
+
   act(() =>{
 
     render(
-    <App/>,container
+    <App></App>,container
   ) 
   })
 
