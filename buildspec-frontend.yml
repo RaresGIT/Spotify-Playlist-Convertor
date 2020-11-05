@@ -4,6 +4,7 @@ phases:
   install:
     commands:
       - echo Installing npm...
+      - cd frontend
       - apt install npm
   pre_build:
     commands:
