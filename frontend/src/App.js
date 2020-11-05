@@ -127,7 +127,7 @@ class App extends Component{
     
     
     return (
-    <div>
+    <div id="app">
       <img src={profilePicture} alt='#' id="profilepic"></img>
       
       <h1>{greeting}</h1>
@@ -136,19 +136,9 @@ class App extends Component{
         {playlistNames.map((playlist,index) => <li key={index.toString()}>{playlist}</li>)}
       </ul>
 
-      <button
-        onClick={() => {
-          window.location = "http://localhost:8888/login";
-        }}
-      >
-        Press here to login with Spotify
-      </button>
-
-      <button
-        onClick={() => window.location = "http://localhost:8889/auth"}
-      >
-        Press here to login with Google
-      </button>
+        <a href="localhost:8888/login"> Press here to login with Spotify </a>
+        <a href="localhost:8889/auth">Press here to login with Google </a>
+     
     </div>
   );
   }
