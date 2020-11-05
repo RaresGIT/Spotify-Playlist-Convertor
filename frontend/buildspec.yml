@@ -1,0 +1,17 @@
+version : node:latest
+
+phases:
+  install:
+    commands:
+      - echo Installing npm...
+      - apt install npm
+  pre_build:
+    commands:
+      - echo Installing dependencies...
+      - npm
+  build:
+    commands:
+      - echo Testing...
+      - npm test
+      - echo Building...
+      - npm build
