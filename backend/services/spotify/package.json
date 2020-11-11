@@ -1,5 +1,5 @@
 {
-  "name": "oauth-bridge-template",
+  "name": "data-api",
   "version": "1.0.0",
   "main": "index.js",
   "scripts": {
@@ -7,9 +7,12 @@
     "start": "node server.js"
   },
   "dependencies": {
+    "axios": "^0.21.0",
     "express": "^4.15.4",
+    "query-string": "^6.13.7",
     "querystring": "^0.2.0",
-    "request": "^2.81.0"
+    "request": "^2.88.2",
+    "spotify-web-api-node": "^5.0.0"
   },
   "devDependencies": {
     "nock": "^13.0.4"
