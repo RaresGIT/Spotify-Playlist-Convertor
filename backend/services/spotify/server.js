@@ -1,11 +1,11 @@
 let express = require('express')
 let request = require('request')
+let cors = require('cors')
 let querystring = require('query-string') 
 const bodyParser = require("body-parser")
 let SpotifyApi = require('spotify-web-api-node')
 
 
-let router = express.Router();
 let app = express()
 
 let SPOTIFY_CLIENT_ID = process.env.SPOTIFY_CLIENT_ID || '70188bbbe3db4c088c59431261db0cd3';
@@ -19,10 +19,10 @@ let spotifyApi = new SpotifyApi();
 
 app.use(bodyParser.urlencoded({ extended: false }));
 app.use(bodyParser.json());
-app.use("/",router);
+app.use(cors());
 
 
-router.get('/auth', function(req, res) {
+app.get('/auth', function(req, res) {
   res.redirect('https://accounts.spotify.com/authorize?' +
     querystring.stringify({
       response_type: 'code',
@@ -32,7 +32,7 @@ router.get('/auth', function(req, res) {
     }))
 })
 
-router.get('/callback', function(req, res) {
+app.get('/callback', function(req, res) {
   let code = req.query.code || null
   let authOptions = {
     url: 'https://accounts.spotify.com/api/token',
@@ -51,12 +51,12 @@ router.get('/callback', function(req, res) {
   request.post(authOptions, function(error, response, body) {
     var access_token = body.access_token
     let uri = process.env.FRONTEND_URI || 'http://localhost:3000'
-    res.send(access_token);
-    //res.redirect(uri + '?access_token_spotify=' + access_token)
+    //res.send(access_token);
+    res.redirect(uri + '?access_token_spotify=' + access_token)
   })
 })
 
-router.get("/spotify-user-data", function(req,res){
+app.get("/spotify-user-data", function(req,res){
             
   spotifyApi.getMe()
   .then(function (data) {
@@ -70,7 +70,7 @@ router.get("/spotify-user-data", function(req,res){
 
 })
 
-router.get("/spotify-user-playlists",function(req,res){
+app.get("/spotify-user-playlists",function(req,res){
 
   spotifyApi.getUserPlaylists()
   .then(function (data) {
@@ -94,7 +94,7 @@ router.get("/spotify-user-playlists",function(req,res){
 
 })
 
-router.get("/spotify-search-tracks",function(req,res){
+app.get("/spotify-search-tracks",function(req,res){
   spotifyApi.getPlaylistTracks(req.body.playlistID)
   .then(function (data){
     
@@ -125,14 +125,16 @@ router.get("/spotify-search-tracks",function(req,res){
   })
 })
 
-router.post("/set-spotify-token",function(req,res){
+app.post("/set-spotify-token",function(req,res){
 
   spotifyApi.setAccessToken(req.body.token);
+  console.log(req.body.token);
   res.send("success");
+  
 
 })
 
-router.get("/search",function(req,res){
+app.get("/search",function(req,res){
   let trackName = req.query.trackName;
   if(trackName.search(/official/i) > 0)
     trackName = trackName.substring(0,trackName.search(/official/i)-1);

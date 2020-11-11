@@ -1,6 +1,7 @@
 let express = require('express')
 let queryString = require('query-string')
 let fetch = require('node-fetch')
+let cors = require('cors')
 let bodyParser = require('body-parser')
 
 let {google} = require('googleapis');
@@ -14,6 +15,7 @@ let authClient = new google.auth.OAuth2(
 let app = express()
 app.use(bodyParser.urlencoded({ extended: false }));
 app.use(bodyParser.json());
+app.use(cors())
 app.get('/auth',function(req,res)
 {
   const url = authClient.generateAuthUrl(
@@ -33,10 +35,10 @@ app.get('/callback', async function(req,res)
 
   authClient.setCredentials(tokens);
   let redirect_uri = process.env.redirect_uri || 'http://localhost:3000/';
-  //res.redirect(redirect_uri + '?access_token_google=' + tokens.access_token);
+  res.redirect(redirect_uri);
 
   
-  res.send(tokens);
+  //res.send(tokens);
 })
 
 authClient.on('tokens', (tokens) => {
@@ -127,7 +129,44 @@ app.get("/playlist-data/next", function(req,res){
 })
 let nextPageTokenVideos = "";
 
-app.get("/playlist-info",function(req,res){
+let allVideos=[]
+function getAllVideos(playlistId,allVideos,pageToken)
+{
+  return new Promise((resolve,reject) =>{
+      var service = google.youtube('v3');
+        service.playlistItems.list({
+          auth:authClient,
+          part: 'snippet,id',
+          playlistId: playlistId,
+          pageToken: pageToken
+        },function(err,response){
+          if(err)
+          console.log(err);
+
+          let videos = [];
+
+          response.data.items.map((video,index) =>{
+            videos[index] = {
+              title : video.snippet.title
+            }
+          })
+
+          allVideos.concat(videos);
+
+          if(response.data.nextPageToken){
+            getAllVideos(playlistId,allVideos,response.data.nextPageToken)
+            .then((resAllVideos) => resolve(resAllVideos))
+          }
+
+  })
+  })
+
+ 
+  
+
+}
+
+app.get("/playlist-videos",function(req,res){
 
 
   var service = google.youtube('v3');
@@ -142,16 +181,18 @@ app.get("/playlist-info",function(req,res){
     if(response.data.nextPageToken)
     nextPageTokenVideos = response.data.nextPageToken;
 
+
     let videos = [];
 
     response.data.items.map((video,index) =>{
       videos[index] = {
-        title : video.snippet.title,
-        channelId: video.snippet.channelId
-
+        title : video.snippet.title
       }
     })
-    res.send(videos);
+    res.send({
+      videos: videos,
+      totalVideoCount: response.data.pageInfo.totalResults
+    });
   })
 
 })
