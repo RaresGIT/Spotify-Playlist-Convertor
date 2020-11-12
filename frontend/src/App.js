@@ -104,32 +104,32 @@ class App extends Component{
   }
 
   GetYoutubeTracks = (playlistId) =>{
-    // axios({
-    //   method:'get',
-    //   url:this.state.googleApiURI + "/playlist-info?playlistId=" + playlistId ,
-    //   headers: {
-    //       'Access-Control-Allow-Origin': '*',
-    //       'Content-Type': 'application/json',
-    //     },
-    // })
-    // .then(response => {
-    //   console.log(response);
+    axios({
+      method:'get',
+      url:this.state.googleApiURI + "/all-playlist-videos?playlistId=" + playlistId ,
+      headers: {
+          'Access-Control-Allow-Origin': '*',
+          'Content-Type': 'application/json',
+        },
+    })
+    .then(response => {
+      console.log(response.data);
 
-    //   let videoCount = response.data.totalVideoCount;
+      let videoCount = response.data.totalVideoCount;
       
-    //   let videos = []
-    //   response.data.videos.map((video,index) =>{
-    //     videos[index] = {
-    //       title: video.title
-    //     }
-    //   })
+      let videos = []
+      response.data.map((video,index) =>{
+        videos[index] = {
+          title: video.title
+        }
+      })
       
-    //   console.log(this.state);
+      console.log(this.state);
 
-    //   this.updateItem(playlistId,{videos});
-    //   console.log(this.state);
+      this.updateItem(playlistId,{videos});
+      console.log(this.state);
       
-    //     })
+        })
   }
 
   updateItem(id, itemAttributes) {
@@ -146,6 +146,38 @@ class App extends Component{
       ]
     });
 }
+
+  createPlaylist(){
+    axios({
+      method:'post',
+      url:this.state.spotifyApiURI + "/create-playlist?playlistName=" + "Testing Playlist Service",
+      headers: {
+          'Access-Control-Allow-Origin': '*',
+          'Content-Type': 'application/json',
+        },
+    })
+    .then(response => {
+      console.log(response);
+    })
+    .catch(err => console.log(err))
+  }
+
+  addItemsToSpotify(){
+    axios({
+      method:'post',
+      url:this.state.spotifyApiURI + "/add-items",
+      headers: {
+          'Access-Control-Allow-Origin': '*',
+          'Content-Type': 'application/json',
+        },
+      data:this.state.playlists[3].videos
+    })
+    .then(response => {
+      console.log(response);
+    })
+    .catch(err => console.log(err))
+  }
+
   render()
   {
     let profilePicture = this.state.profilepic
@@ -185,7 +217,7 @@ class App extends Component{
       
               <h1>{greeting}</h1>
 
-      
+              <div style={{display:"flex"}}>
               <a href="http://localhost:8888/auth">
                 Login with Spotify
               </a>
@@ -193,6 +225,15 @@ class App extends Component{
               <a href="http://localhost:8889/auth">
                 Login with Google
               </a>
+
+              <button onClick={() => this.createPlaylist()} className="btn btn-primary">
+                Create Playlist
+                </button>
+
+                <button onClick={() => this.addItemsToSpotify()} className="btn btn-primary">
+                Add Items To Spotify
+                </button>
+                </div>
             </div>
 
             <div className="col col-6">

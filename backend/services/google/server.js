@@ -129,43 +129,72 @@ app.get("/playlist-data/next", function(req,res){
 })
 let nextPageTokenVideos = "";
 
-let allVideos=[]
-function getAllVideos(playlistId,allVideos,pageToken)
-{
-  return new Promise((resolve,reject) =>{
-      var service = google.youtube('v3');
-        service.playlistItems.list({
-          auth:authClient,
-          part: 'snippet,id',
-          playlistId: playlistId,
-          pageToken: pageToken
-        },function(err,response){
-          if(err)
-          console.log(err);
 
-          let videos = [];
+app.get("/all-playlist-videos",function(req,res){
 
-          response.data.items.map((video,index) =>{
-            videos[index] = {
-              title : video.snippet.title
-            }
-          })
+  let allVideos=[];
+  let pageToken="";
+  let playlistId;
 
-          allVideos.concat(videos);
+  async function getAllVideos(playlistId,allVideos,pageToken,auth)
+      {
+        //console.log(allVideos);
+        //console.log("called");
+        return new Promise((resolve,reject) =>{
+            var service = google.youtube('v3');
+              service.playlistItems.list({
+                auth:auth,
+                part: 'snippet,id',
+                playlistId: playlistId,
+                pageToken: pageToken
+              },function(err,response){
+                if(err)
+                console.log(err);
 
-          if(response.data.nextPageToken){
-            getAllVideos(playlistId,allVideos,response.data.nextPageToken)
-            .then((resAllVideos) => resolve(resAllVideos))
-          }
+                let videos = [];
 
+                //console.log(response);
+                response.data.items.map((video,index) =>{
+                  videos[index] = {
+                    title : video.snippet.title
+                  }
+                })
+                
+                Array.prototype.push.apply(allVideos,videos);
+                //console.log("This call: " + videos);
+                //console.log("All:" + allVideos)
+                //console.log(allVideos);
+                if(response.data.nextPageToken){
+                  getAllVideos(playlistId,allVideos,response.data.nextPageToken,auth)
+                  .then((resAllVideos) => resolve(resAllVideos))
+                }
+                else{
+                  resolve(allVideos);
+                }
+
+        })
+        })
+          
+      }
+
+  
+  if(req.query.playlistId != null)
+  playlistId = req.query.playlistId
+  else
+  res.send("did not receive playlistId query");
+
+  getAllVideos(playlistId,allVideos,pageToken,authClient)
+  .then(function(sendResponse){
+    console.log(allVideos);
+    res.send(allVideos);
   })
-  })
-
- 
+  //console.log(authClient);
+  
+  
   
 
-}
 
+})
 app.get("/playlist-videos",function(req,res){
 
 
@@ -197,7 +226,7 @@ app.get("/playlist-videos",function(req,res){
 
 })
 
-app.get("/playlist-info/next",function(req,res){
+app.get("/playlist-videos/next",function(req,res){
 
 
   var service = google.youtube('v3');

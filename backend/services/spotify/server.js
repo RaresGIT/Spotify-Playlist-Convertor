@@ -15,7 +15,7 @@ let redirect_uri =
   'http://localhost:8888/callback'
 
 let spotifyApi = new SpotifyApi();
-
+let playlistName = "";
 
 app.use(bodyParser.urlencoded({ extended: false }));
 app.use(bodyParser.json());
@@ -27,7 +27,7 @@ app.get('/auth', function(req, res) {
     querystring.stringify({
       response_type: 'code',
       client_id: SPOTIFY_CLIENT_ID,
-      scope: 'user-read-private user-read-email',
+      scope: 'user-read-private user-read-email playlist-modify-public playlist-modify-private',
       redirect_uri
     }))
 })
@@ -56,11 +56,12 @@ app.get('/callback', function(req, res) {
   })
 })
 
+//mandatory
 app.get("/spotify-user-data", function(req,res){
             
   spotifyApi.getMe()
   .then(function (data) {
-    console.log(data.body.display_name,data.body.spotify);
+    //console.log(data.body);
     res.send(data);
   })
   .catch(function(error){
@@ -133,6 +134,95 @@ app.post("/set-spotify-token",function(req,res){
   
 
 })
+
+app.post("/create-playlist",function(req,res){
+  if(req.query.playlistName != null)
+   playlistName = req.query.playlistName
+  else
+  res.send("didnt receive playlist name")
+
+  spotifyApi.createPlaylist(playlistName,{'description' : 'This playlists was generated using an online service' , 'public' : true })
+  .then(function(data){
+    console.log("created");
+    res.send("created playlist");
+  })
+  .catch(function(error){
+    console.log(error);
+  })
+  
+})
+
+app.post("/add-items",function(req,res){
+
+  // let createdPlaylistId = "";
+  // spotifyApi.searchPlaylists(playlistName)
+  // .then(function(data){
+  //   //console.log(data.body.playlists.items[0].id);
+  //   createdPlaylistId = data.body.playlists.items[0].id;
+  // })
+  // .catch(function(err){
+  //   console.log(err);
+  // })
+
+  let songs = []
+
+  //console.log(req.body);
+  songs = req.body;
+  //console.log(songs.length);
+
+  let trimmednames = [];
+
+  for(let i=0;i<songs.length;i++)
+  {
+      let trackName = songs[i].title;
+
+      if(trackName.search(/official/i) > 0)
+        trackName = trackName.substring(0,trackName.search(/official/i)-1);
+
+      if(trackName.indexOf("(") >0)
+        trackName = trackName.substring(0,trackName.indexOf("(")-1);
+
+      trimmednames.push(trackName);
+
+  }
+
+  function searchTrack(track){
+    //console.log(track);
+    return new Promise((resolve,reject) => {
+      resolve(spotifyApi.searchTracks(track,{limit:1}));
+    })
+  }
+
+  let promises = []
+
+  for(let i=0;i<trimmednames.length;i++)
+  {
+    let promise = searchTrack(trimmednames[i]);
+    promises.push(promise);
+  }
+
+  let uris = []
+  
+  
+  Promise.all(promises)
+  .then(results =>{
+    results.map((result,index) =>{
+      try{
+        console.log(result.body.tracks.items[0].uri);
+        uris.push(result.body.tracks.items[0].uri);
+              
+      }
+      catch{
+        //console.log("not found");
+      }
+    })
+  })
+
+  //console.log(uris);
+    
+  })
+
+
 
 app.get("/search",function(req,res){
   let trackName = req.query.trackName;
