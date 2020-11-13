@@ -9,27 +9,27 @@ process.env.CI=true;
 //afterEach(cleanup);
 
 //jest.mock("./")
-it("should render app", () => {
-  let container = document.createElement('div');
-  document.body.appendChild(container);
+// it("should render app", () => {
+//   let container = document.createElement('div');
+//   document.body.appendChild(container);
 
 
-  act(() =>{
-    render(
-      <App/>,container
-    ) 
-  })
+//   act(() =>{
+//     render(
+//       <App/>,container
+//     ) 
+//   })
 
-  const loginSpotifyButton = container.querySelector('[href="localhost:8888/login"]');
-  const loginGoogleButton = container.querySelector('[href="localhost:8889/auth"]');
-  const profilePic = container.querySelector('[id="profilepic"]');
-  expect(
-  loginSpotifyButton
-  ).not.toBeFalsy();
+//   const loginSpotifyButton = container.querySelector('[href="localhost:8888/login"]');
+//   const loginGoogleButton = container.querySelector('[href="localhost:8889/auth"]');
+//   const profilePic = container.querySelector('[id="profilepic"]');
+//   expect(
+//   loginSpotifyButton
+//   ).not.toBeFalsy();
 
-  expect(loginGoogleButton).not.toBeFalsy();
-  expect(profilePic).not.toBeFalsy();
+//   expect(loginGoogleButton).not.toBeFalsy();
+//   expect(profilePic).not.toBeFalsy();
   
   
   
-})
+// })

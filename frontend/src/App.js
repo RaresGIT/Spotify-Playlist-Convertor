@@ -163,6 +163,9 @@ class App extends Component{
   }
 
   addItemsToSpotify(){
+
+    const index = document.getElementById("selectPlaylist").selectedIndex;
+    console.log(index);
     axios({
       method:'post',
       url:this.state.spotifyApiURI + "/add-items",
@@ -170,7 +173,7 @@ class App extends Component{
           'Access-Control-Allow-Origin': '*',
           'Content-Type': 'application/json',
         },
-      data:this.state.playlists[3].videos
+      data:this.state.playlists[0].videos
     })
     .then(response => {
       console.log(response);
@@ -205,6 +208,17 @@ class App extends Component{
     })
      : "Didnt load playlists"
 
+     let comboBoxPlaylists = this.state.playlists
+     ?
+     this.state.playlists.map((playlist,index) =>{
+       return (
+         <option value={playlist.title} key={index}>
+           {playlist.title}
+         </option>
+       )
+     })
+     : "Didn't load playlists"
+
     return (
       <Router>
         <div className="container">
@@ -230,6 +244,12 @@ class App extends Component{
                 Create Playlist
                 </button>
 
+
+              <label for="selectPLaylist">Choose Playlist:
+              <select name="selectPLaylist" id="selectPLaylist">
+                {comboBoxPlaylists}
+              </select>
+              </label>
                 <button onClick={() => this.addItemsToSpotify()} className="btn btn-primary">
                 Add Items To Spotify
                 </button>
