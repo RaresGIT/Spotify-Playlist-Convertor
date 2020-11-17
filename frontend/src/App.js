@@ -1,7 +1,8 @@
 import React, { Component } from "react";
 import queryString from "query-string";
 import axios from 'axios';
-import {BrowserRouter as Router, Switch, Route,Link} from "react-router-dom";
+import ColumnLeft from './components/ColLeft';
+import ColumnRight from './components/ColRight';
 import 'bootstrap/dist/css/bootstrap.css';
 import './App.css';
 
@@ -11,71 +12,170 @@ class App extends Component{
     super();
     this.state={
       spotifyApiURI: "http://localhost:8888",
-      googleApiURI: "http://localhost:8889"
+      googleApiURI: "http://localhost:8889",
+      defaultURI: "http://localhost:3000"
     }
   }
 
   
   componentDidMount()
   {
-    let access_token_spotify = queryString.parse(window.location.search).access_token_spotify || null;
-    //let access_token_google = queryString.parse(window.location.search).access_token_google ||  null;
-
+    this.checkAuth()
     
+  }
 
-    if(access_token_spotify!= null)
-    {
-      axios({
-        method:'post',
-        url: this.state.spotifyApiURI + "/set-spotify-token",
-        data:{
-          token: access_token_spotify
-        },
-        headers: {
-          'Access-Control-Allow-Origin': '*',
-          'Content-Type': 'application/json',
-        },
+  GetYoutubeTracks = (playlistId) =>{
 
-      })
-      .then(response => console.log(response))
-      .catch(error => console.log(error))
+    return new Promise((resolve) =>{
+      resolve(
 
-      window.location = 'http://localhost:3000';
-    }
-
-    axios({
+        axios({
       method:'get',
-      url:this.state.spotifyApiURI + "/spotify-user-data",
+      url:this.state.googleApiURI + "/all-playlist-videos?playlistId=" + playlistId ,
       headers: {
           'Access-Control-Allow-Origin': '*',
           'Content-Type': 'application/json',
         },
-    })
-    .then(response => {
-      
-      let data = response.data.body;
-
-      this.setState({
-        country: data.country,
-        name: data.display_name,
-        profilepic: data.images[0].url
       })
+      .then(response => {
+        console.log(response.data);
+        
+        let videos = [];
+        response.data.map((video,index) =>{
+          videos[index] = {
+            title: video.title
+          }
+        })
+        return videos;
+        })
+      .then(videos => {
+        this.updateItem(playlistId,{videos});
+      })
+      
+      )
+  })
+}
+
+  updateItem(id, itemAttributes) {
+  var index = this.state.youtubePlaylists.findIndex(x=> x.id === id);
+  if (index === -1)
+    // handle error
+    console.log(index);
+  else
+    this.setState({
+      youtubePlaylists: [
+         ...this.state.youtubePlaylists.slice(0,index),
+         Object.assign({}, this.state.youtubePlaylists[index], itemAttributes),
+         ...this.state.youtubePlaylists.slice(index+1)
+      ]
+    });
+}
+
+  createSpotifyPlaylist(textBoxID){
+    const name = document.getElementById(textBoxID).value;
+    console.log(name);
+
+
+    return new Promise((resolve) => {
+      resolve(
+              axios({
+                method:'post',
+                url:this.state.spotifyApiURI + "/create-playlist?playlistName=" + name,
+                headers: {
+                'Access-Control-Allow-Origin': '*',
+                'Content-Type': 'application/json',
+              },
+              })
+              .then(response => {
+                console.log(response);
+              })
+              .catch(err => console.log(err))
+      )
+    })
+    
+  }
+
+  addItemsToSpotify(comboBoxID){
+    const index = document.getElementById(comboBoxID).selectedIndex;
+    console.log(index);
+    return new Promise((resolve) =>{
+
+      resolve(
+
+            this.GetYoutubeTracks(this.state.youtubePlaylists[index].id)
+            .then(placeholder => {
+
+              axios({
+              method:'post',
+              url:this.state.spotifyApiURI + "/add-items",
+              headers: {
+                  'Access-Control-Allow-Origin': '*',
+                  'Content-Type': 'application/json',
+                },
+              data:this.state.youtubePlaylists[index].videos
+            })
+            .then(response => {
+              console.log(response);
+            })
+            .catch(err => console.log(err))
+
+
+
+            })
+
+            
+
+      )
 
     })
-    .catch(err => console.log(err))
+    
+  }
 
-    axios({
+
+  getSpotifyUserData()
+  {
+    return new Promise((resolve) => {
+      resolve(
+        axios({
+          method:'get',
+          url:this.state.spotifyApiURI + "/spotify-user-data",
+          headers: {
+            'Access-Control-Allow-Origin': '*',
+            'Content-Type': 'application/json',
+        },
+          })
+        .then(response => {
+      
+          let data = response.data.body;
+
+          this.setState({
+            country: data.country,
+            name: data.display_name,
+            profilepic: data.images[0].url
+          })
+
+            })
+        .catch(err => console.log(err)))
+    })
+        
+    
+  }
+
+  getYoutubePlaylists()
+  {
+      return new Promise((resolve) => {
+
+        resolve(
+          axios({
       method:'get',
-      url:this.state.googleApiURI + "/playlist-data",
+      url:this.state.googleApiURI + "/all-playlists",
       headers: {
           'Access-Control-Allow-Origin': '*',
           'Content-Type': 'application/json',
         },
-    })
-    .then(response => {
+        })
+      .then(response => {
       
-      //console.log(response);
-
       let playlists = []
       response.data.map((playlist,index) =>{
         playlists[index] = {
@@ -84,102 +184,95 @@ class App extends Component{
           thumbnail: playlist.thumbnail,
           videos:[]
         }
-      })
-
-      this.setState({
-        playlists: playlists
-      })
-
-      //console.log(this.state);
-      
-
-    })
-    .catch(err => console.log(err))
-
-    
-
-    
-
-
-  }
-
-  GetYoutubeTracks = (playlistId) =>{
-    axios({
-      method:'get',
-      url:this.state.googleApiURI + "/all-playlist-videos?playlistId=" + playlistId ,
-      headers: {
-          'Access-Control-Allow-Origin': '*',
-          'Content-Type': 'application/json',
-        },
-    })
-    .then(response => {
-      console.log(response.data);
-
-      let videoCount = response.data.totalVideoCount;
-      
-      let videos = []
-      response.data.map((video,index) =>{
-        videos[index] = {
-          title: video.title
-        }
-      })
-      
-      console.log(this.state);
-
-      this.updateItem(playlistId,{videos});
-      console.log(this.state);
-      
         })
+
+         this.setState({
+          youtubePlaylists: playlists
+          })
+        })
+      .catch(err => console.log(err))
+
+        )
+
+      })
+      
   }
 
-  updateItem(id, itemAttributes) {
-  var index = this.state.playlists.findIndex(x=> x.id === id);
-  if (index === -1)
-    // handle error
-    console.log(index);
-  else
-    this.setState({
-      playlists: [
-         ...this.state.playlists.slice(0,index),
-         Object.assign({}, this.state.playlists[index], itemAttributes),
-         ...this.state.playlists.slice(index+1)
-      ]
-    });
-}
-
-  createPlaylist(){
-    axios({
-      method:'post',
-      url:this.state.spotifyApiURI + "/create-playlist?playlistName=" + "Testing Playlist Service",
-      headers: {
-          'Access-Control-Allow-Origin': '*',
-          'Content-Type': 'application/json',
+  checkAuth()
+  {
+    
+      axios({
+          method:'get',
+          url:this.state.spotifyApiURI + "/is-token-set",
+          headers: {
+            'Access-Control-Allow-Origin': '*',
+            'Content-Type': 'application/json',
         },
-    })
-    .then(response => {
-      console.log(response);
-    })
-    .catch(err => console.log(err))
-  }
+          })
+        .then(response => {
+      
+          console.log(response.data);
+          if(response.data === true)
+          this.setState({
+            authSpotify:true
+          })
 
-  addItemsToSpotify(){
-
-    const index = document.getElementById("selectPlaylist").selectedIndex;
-    console.log(index);
+            })
+              
+            
     axios({
-      method:'post',
-      url:this.state.spotifyApiURI + "/add-items",
-      headers: {
-          'Access-Control-Allow-Origin': '*',
-          'Content-Type': 'application/json',
-        },
-      data:this.state.playlists[0].videos
-    })
-    .then(response => {
-      console.log(response);
-    })
-    .catch(err => console.log(err))
+          method:'get',
+          url:this.state.googleApiURI + "/is-token-set",
+          headers: {
+                  'Access-Control-Allow-Origin': '*',
+                  'Content-Type': 'application/json',
+                    },
+          })
+          .then(response => {
+                  
+                  console.log(response.data);
+                  if(response.data === true)
+                  this.setState({
+                    authGoogle:true
+                  })
+
+                  })
+          .then(placeholder =>{
+            let promises = []
+            if(this.state.authSpotify === true)
+            promises.push(this.getSpotifyUserData())
+
+            if(this.state.authGoogle === true)
+            promises.push(this.getYoutubePlaylists())
+
+            Promise.all(promises)
+            .then(placeholder => console.log(this.state))
+
+          })
+                   
   }
+
+  onMigrateClick = (index,playlistName) =>{
+       //console.log(index,playlistName);
+
+      //  this.setState({
+      //    selectedYoutubePlaylistIndex : index,
+      //    desiredSpotifyPlaylistName : playlistName
+      //  })
+
+      let promises =[]
+
+      const CreatePlaylistPromise = this.createSpotifyPlaylist("spotifyPlaylistName");
+      promises.push(CreatePlaylistPromise);
+      const AddItemsToPlaylistPromise = this.addItemsToSpotify("comboSelectPlaylists");
+      promises.push(AddItemsToPlaylistPromise);
+
+      Promise.all(promises)
+      .then(placeholder => console.log("Created and added items to playlist"));
+
+
+      
+     }
 
   render()
   {
@@ -208,9 +301,9 @@ class App extends Component{
     })
      : "Didnt load playlists"
 
-     let comboBoxPlaylists = this.state.playlists
+     let comboBoxPlaylists = this.state.youtubePlaylists
      ?
-     this.state.playlists.map((playlist,index) =>{
+     this.state.youtubePlaylists.map((playlist,index) =>{
        return (
          <option value={playlist.title} key={index}>
            {playlist.title}
@@ -219,54 +312,69 @@ class App extends Component{
      })
      : "Didn't load playlists"
 
+     const styleColLeft = {
+       height:"100vh",
+       border: "1px solid #fff",
+       backgroundColor:"cyan",
+       display:"flex",
+       flexDirection:"column"
+     }
+
+     const styleColRight = {
+       height:"100vh",
+       border: "1px solid #fff",
+       backgroundColor:"red",
+       display:"flex",
+       flexDirection:"column"
+     }
+
+     let isAuthWithSpotify = false;
+
+     const onSpotifyLogin = () =>{
+       //console.log(isAuthWithSpotify);
+       //isAuthWithSpotify=true;
+
+
+       //Auth Spotify Service
+      window.location = this.state.spotifyApiURI + "/auth";
+
+
+     }
+
+     const onGoogleLogin = () =>{
+       console.log("yay");
+
+       //Auth Google Service
+       window.location = this.state.googleApiURI + "/auth";
+     }
+
+     
     return (
-      <Router>
-        <div className="container">
-          <div className="row justify-content-md-center">
-            <div className="col col-6">
-
-              <img src={profilePicture} alt='#' id="profilepic"
-              style={{maxHeight:"75%", maxWidth:"75%"}}
-              ></img>
       
-              <h1>{greeting}</h1>
+        <div className="container">
+          <div className="row justify-content-lg-center">
+            <div className="col-12 col-md-8" style={styleColLeft}>
 
-              <div style={{display:"flex"}}>
-              <a href="http://localhost:8888/auth">
-                Login with Spotify
-              </a>
+              <ColumnLeft
+              onSpotifyLogin={onSpotifyLogin}
+              onGoogleLogin={onGoogleLogin}
+              isAuthWithSpotify={isAuthWithSpotify}
 
-              <a href="http://localhost:8889/auth">
-                Login with Google
-              </a>
+              />
 
-              <button onClick={() => this.createPlaylist()} className="btn btn-primary">
-                Create Playlist
-                </button>
-
-
-              <label for="selectPLaylist">Choose Playlist:
-              <select name="selectPLaylist" id="selectPLaylist">
-                {comboBoxPlaylists}
-              </select>
-              </label>
-                <button onClick={() => this.addItemsToSpotify()} className="btn btn-primary">
-                Add Items To Spotify
-                </button>
-                </div>
             </div>
+            <div className="col-12 col-md-4" style={styleColRight}>
 
-            <div className="col col-6">
-
-              {playlists}
+              <ColumnRight
+              isAuth={true}
+              comboBoxPlaylists={comboBoxPlaylists}
+              onMigrateClick={(index,playlistName) => this.onMigrateClick(index,playlistName)}
+              />
             </div>
           </div>
           
 
-          
-     
        </div>
-    </Router>
   );
   }
 }

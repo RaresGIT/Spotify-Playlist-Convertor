@@ -15,7 +15,7 @@ let redirect_uri =
   'http://localhost:8888/callback'
 
 let spotifyApi = new SpotifyApi();
-let playlistName = "";
+let playlistId = "";
 
 app.use(bodyParser.urlencoded({ extended: false }));
 app.use(bodyParser.json());
@@ -53,12 +53,22 @@ app.get('/callback', function(req, res) {
     var access_token = body.access_token
     let uri = process.env.FRONTEND_URI || 'http://localhost:3000'
     //res.send(access_token);
-    res.redirect(uri + '?access_token_spotify=' + access_token)
+
+    spotifyApi.setAccessToken(access_token);
+    res.redirect(uri + "?setSpotifyToken=true");
   })
   }
   catch{
     console.log("failed auth");
   }
+})
+
+app.get("/is-token-set",function(req,res){
+
+  if(spotifyApi.getAccessToken() != null)
+  res.send("true");
+  else
+  res.send("false");
 })
 
 //mandatory
@@ -141,6 +151,7 @@ app.post("/set-spotify-token",function(req,res){
 })
 
 app.post("/create-playlist",function(req,res){
+  let playlistName = "";
   if(req.query.playlistName != null)
    playlistName = req.query.playlistName
   else
@@ -148,8 +159,9 @@ app.post("/create-playlist",function(req,res){
 
   spotifyApi.createPlaylist(playlistName,{'description' : 'This playlists was generated using an online service' , 'public' : true })
   .then(function(data){
-    //console.log("created");
-    res.send("created playlist");
+    playlistId = data.body.id;
+    //res.send("created playlist");
+    res.send("Created " + playlistName + "with id : " + playlistId);
   })
   .catch(function(error){
     console.log(error);
@@ -157,32 +169,14 @@ app.post("/create-playlist",function(req,res){
   
 })
 
-app.post("/add-items",function(req,res){
+app.post("/add-items", function(req,res){
 
-
-  console.log("here");
-  let createdPlaylistId = "";
-  spotifyApi.searchPlaylists(playlistName)
-  .then(function(data){
-    //console.log(data.body.playlists.items[0].id);
-    try
-    {//console.log(data.body);
-    createdPlaylistId = data.body.playlists.items[0].id;}
-    catch{
-      console.log("playlist not found");
-    }
-  
-  })
-  .catch(function(err){
-    console.log(err);
-  })
 
   let songs = []
-
   //console.log(req.body);
   songs = req.body;
   //console.log(songs.length);
-
+  //console.log(songs);
   let trimmednames = [];
 
   for(let i=0;i<songs.length;i++)
@@ -200,7 +194,6 @@ app.post("/add-items",function(req,res){
   }
 
   function searchTrack(track){
-    //console.log(track);
     return new Promise((resolve,reject) => {
       resolve(spotifyApi.searchTracks(track,{limit:1}));
     })
@@ -214,44 +207,31 @@ app.post("/add-items",function(req,res){
     promises.push(promise);
   }
 
-  let uris = []
-  
   
   Promise.all(promises)
   .then(results =>{
-    results.map((result,index) =>{
-      try{
-        //console.log(result.body.tracks.items[0].uri);
-        uris.push(result.body.tracks.items[0].uri);
-
-        if(index === promises.length-1)
-        {
-          console.log(uris);
-          
-          spotifyApi.addTracksToPlaylist(createdPlaylistId,uris)
-          .then(data =>{
-            console.log('Added tracks to playlist');
-            console.log(uris);
-            res.send("Created Playlist with id: " + createdPlaylistId + "and " + uris.length + " tracks!");
-          })
-          .catch(err => {
-            console.log(err);
-            res.send(err);
-          })
-        }
-              
-      }
-      catch{
-        //console.log("not found");
-      }
+    //console.log(results);
+    let uris = [];
+    results.forEach((result) =>{
+        try
+        {uris.push(result.body.tracks.items[0].uri);}
+       catch{
+         //console.log("not found");
+       }
     })
+    return uris;
   })
-
-  //console.log(uris);
+  .then(uris => {
+    
+    console.log(uris);
+    console.log("adding items");
+    spotifyApi.addTracksToPlaylist(playlistId,uris)
+    .then(data => {res.send("Succes!")})
+    .catch(err => {res.send("Failed!")})
+    
+  }) 
     
   })
-
-
 
 app.get("/search",function(req,res){
   let trackName = req.query.trackName;
