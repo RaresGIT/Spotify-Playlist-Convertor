@@ -12,7 +12,7 @@ let SPOTIFY_CLIENT_ID = process.env.SPOTIFY_CLIENT_ID || '70188bbbe3db4c088c5943
 let SPOTIFY_CLIENT_SECRET = process.env.SPOTIFY_CLIENT_SECRET || '5439baa2e8cd4c19aec16184f2e68f0c';
 let redirect_uri = 
   process.env.REDIRECT_URI || 
-  'http://localhost:8888/callback'
+  'https://playlist-converter-spotify.herokuapp.com/callback'
 
 let spotifyApi = new SpotifyApi();
 let playlistId = "";
@@ -21,6 +21,10 @@ app.use(bodyParser.urlencoded({ extended: false }));
 app.use(bodyParser.json());
 app.use(cors());
 
+
+app.get('/',function(req,res){
+  res.send('Hello!');
+})
 
 app.get('/auth', function(req, res) {
   res.redirect('https://accounts.spotify.com/authorize?' +
@@ -51,7 +55,7 @@ app.get('/callback', function(req, res) {
   }
   request.post(authOptions, function(error, response, body) {
     var access_token = body.access_token
-    let uri = process.env.FRONTEND_URI || 'http://localhost:3000'
+    let uri = process.env.FRONTEND_URI || 'https://playlist-converter-frontend.herokuapp.com/'
     //res.send(access_token);
 
     spotifyApi.setAccessToken(access_token);
@@ -193,11 +197,6 @@ app.post("/add-items", function(req,res){
 
   }
 
-  function searchTrack(track){
-    return new Promise((resolve,reject) => {
-      resolve(spotifyApi.searchTracks(track,{limit:1}));
-    })
-  }
 
   let promises = []
 
@@ -223,14 +222,44 @@ app.post("/add-items", function(req,res){
   })
   .then(uris => {
     
-    console.log(uris);
-    console.log("adding items");
-    spotifyApi.addTracksToPlaylist(playlistId,uris)
-    .then(data => {res.send("Succes!")})
+    if(uris.length < 100)
+    {
+    addItemsToPlaylist(playlistID,uris)
+    .then(data => {res.send("Succes, added" + uris.length + " songs!")})
     .catch(err => {res.send("Failed!")})
-    
+    }
+    else{
+
+      // let promises= [];
+      // for(let i=0;i<uris.length/100;i++)
+      // {
+      //   if((i+1)*100 < uri.length)
+      //     promises.push(addItemsToPlaylist(uris.splice(i*100,(i+1)*100)));
+      //   else
+      //     promises.push(addItemsToPlaylist(uris.splice(i*100,uris.length)))
+      // }
+
+      // Promise.all(promises)
+      // .then(results => res.send("Succes, added" + uris.length + " songs!")
+      // .catch(err => res.send("Failed!"))
+      // )
+
+      res.send("Playlist too powerful!");
+    }
   }) 
-    
+    //utilities
+  function searchTrack(track){
+    return new Promise((resolve,reject) => {
+      resolve(spotifyApi.searchTracks(track,{limit:1}));
+    })
+  }
+
+  function addItemsToPlaylist(uris){
+    return new Promise((resolve) => {
+      resolve(spotifyApi.addTracksToPlaylist(playlistID,uris));
+    })
+  }
+
   })
 
 app.get("/search",function(req,res){

@@ -20,15 +20,15 @@ class ColRight extends Component{
 
     render()
     {
-        const placeHolderStyle={
+        const colContainerStyle={
             width:"100%",
-            height:"calc(100vw * 0.2)",
             minHeight:"250px",
-            marginTop:"25vw",
-            backgroundColor:"white"
+            height:"calc(100vh * 0.3)",
+            backgroundColor:"white",
+            border : "2px solid black"
         }
 
-        const textStyle={
+        const notLoggedInStyle={
             lineHeight:"normal",
             fontSize:"20px",
             fontWeight:"500",
@@ -44,8 +44,8 @@ class ColRight extends Component{
         onMigrateClick={(index,playlistName) => this.onMigrateClick(index,playlistName)}
         />
         :
-        <div style={placeHolderStyle}>
-            <p style={textStyle}>
+        <div >
+            <p style={notLoggedInStyle}>
                     Welcome to $(Brand)
               <br/> Login with Spotify and Google
               <br/> to use features </p>
@@ -53,9 +53,9 @@ class ColRight extends Component{
 
         return(
 
-            <>
+            <div style = {colContainerStyle}>
             {content}
-            </>
+            </div>
             
         )
         

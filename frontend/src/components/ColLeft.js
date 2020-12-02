@@ -2,8 +2,8 @@ import React, { Component } from 'react';
 
 
 const styleLoginButtons={
-    width:"50%",
-    maxWidth:"200px",
+    width:"100%",
+    maxWidth:"300px",
     marginTop:"30px",
     marginLeft:"auto",
     marginRight:"auto",
@@ -11,10 +11,10 @@ const styleLoginButtons={
 }
 
 const styleLogoBanner = {
-    width:"50%",
+    marginTop:"15px",
+    width:"100%",
     minWidth:"200px",
     maxWidth:"300px",
-    marginTop:"55%",
     marginLeft:"auto",
     marginRight:"auto"
 }
@@ -54,7 +54,7 @@ class ColLeft extends Component{
         "Logged In"
         :
         <button 
-        className="btn btn-primary"
+        className="btn btn-success"
         style={styleLoginButtons}
         onClick={() => this.handleSpotifyLogin()}
         >Login with Spotify</button>
@@ -73,7 +73,7 @@ class ColLeft extends Component{
         
         
         <button
-        className="btn btn-primary"
+        className="btn btn-danger"
         style={styleLoginButtons}
         onClick={() => this.handleGoogleLogin()}
         >Login with Google</button>

@@ -10,7 +10,7 @@ let isAccessTokenSet = false;
 let authClient = new google.auth.OAuth2(
   '351958591751-3rlg46hcqh3soiasec3kj6n33m0m1h6r.apps.googleusercontent.com',
   'B1K_CXLwGd5YCrRNDrJSgm8S',
-  'http://localhost:8889/callback'
+  'https://playlist-converter-google.herokuapp.com/callback'
 )
 
 let app = express()
@@ -38,7 +38,7 @@ app.get('/callback', async function(req,res)
 
   authClient.setCredentials(tokens);
   isAccessTokenSet = true;
-  let redirect_uri = process.env.redirect_uri || 'http://localhost:3000';
+  let redirect_uri = process.env.redirect_uri || 'https://playlist-converter-frontend.herokuapp.com/';
   res.redirect(redirect_uri + "?setGoogleToken=true");
 
   

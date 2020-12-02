@@ -4,7 +4,11 @@
   "main": "index.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
-    "start": "nodemon server.js"
+    "start": "node server.js"
+  },
+  "engines": {
+    "node": "latest",
+    "npm": "latest"
   },
   "dependencies": {
     "body-parser": "^1.19.0",
@@ -15,6 +19,5 @@
     "query-string": "^6.13.7"
   },
   "devDependencies": {
-    "nodemon": "^2.0.6"
   }
 }

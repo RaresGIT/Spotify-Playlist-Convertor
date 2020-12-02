@@ -11,9 +11,9 @@ class App extends Component{
   {
     super();
     this.state={
-      spotifyApiURI: "http://localhost:8888",
-      googleApiURI: "http://localhost:8889",
-      defaultURI: "http://localhost:3000"
+      spotifyApiURI: "https://playlist-converter-spotify.herokuapp.com",
+      googleApiURI: "https://playlist-converter-google.herokuapp.com",
+      defaultURI: "https://playlist-converter-frontend.herokuapp.com"
     }
   }
 
@@ -252,7 +252,7 @@ class App extends Component{
                    
   }
 
-  onMigrateClick = (index,playlistName) =>{
+  onMigrateClick = () =>{
        //console.log(index,playlistName);
 
       //  this.setState({
@@ -310,22 +310,21 @@ class App extends Component{
          </option>
        )
      })
-     : "Didn't load playlists"
+     : <option>
+       Didn't load any playlists!
+     </option>
 
      const styleColLeft = {
-       height:"100vh",
-       border: "1px solid #fff",
-       backgroundColor:"cyan",
+       
        display:"flex",
-       flexDirection:"column"
+       flexDirection:"column",
+       marginTop:"30%",
+      
      }
 
      const styleColRight = {
-       height:"100vh",
-       border: "1px solid #fff",
-       backgroundColor:"red",
-       display:"flex",
-       flexDirection:"column"
+       
+       marginTop:"30%"
      }
 
      let isAuthWithSpotify = false;
@@ -353,7 +352,7 @@ class App extends Component{
       
         <div className="container">
           <div className="row justify-content-lg-center">
-            <div className="col-12 col-md-8" style={styleColLeft}>
+            <div className="col-12 col-md-7" style={styleColLeft}>
 
               <ColumnLeft
               onSpotifyLogin={onSpotifyLogin}
@@ -363,18 +362,20 @@ class App extends Component{
               />
 
             </div>
-            <div className="col-12 col-md-4" style={styleColRight}>
+            <div className="col-12 col-md-5" style={styleColRight}>
 
               <ColumnRight
               isAuth={true}
               comboBoxPlaylists={comboBoxPlaylists}
-              onMigrateClick={(index,playlistName) => this.onMigrateClick(index,playlistName)}
+              onMigrateClick={() => this.onMigrateClick()}
               />
             </div>
           </div>
           
 
        </div>
+
+      
   );
   }
 }
