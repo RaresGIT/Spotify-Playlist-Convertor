@@ -3,6 +3,7 @@ let queryString = require('query-string')
 let fetch = require('node-fetch')
 let cors = require('cors')
 let bodyParser = require('body-parser')
+let session = require('express-session')
 
 let {google} = require('googleapis');
 const { auth } = require('googleapis/build/src/apis/abusiveexperiencereport');
@@ -10,13 +11,22 @@ let isAccessTokenSet = false;
 let authClient = new google.auth.OAuth2(
   '351958591751-3rlg46hcqh3soiasec3kj6n33m0m1h6r.apps.googleusercontent.com',
   'B1K_CXLwGd5YCrRNDrJSgm8S',
-  'https://playlist-converter-google.herokuapp.com/callback'
+  'http://localhost:8889/callback'
 )
+// hosted redirect : 'https://playlist-converter-google.herokuapp.com/callback'
 
 let app = express()
 app.use(bodyParser.urlencoded({ extended: false }));
 app.use(bodyParser.json());
 app.use(cors())
+app.use(session({
+  secret: 'verysecuresecret',
+  resave: false,
+  saveUninitialized: true,
+  cookie: { secure: true }
+}))
+
+let access_token = "";
 
 app.get('/auth',function(req,res)
 {
@@ -38,7 +48,10 @@ app.get('/callback', async function(req,res)
 
   authClient.setCredentials(tokens);
   isAccessTokenSet = true;
-  let redirect_uri = process.env.redirect_uri || 'https://playlist-converter-frontend.herokuapp.com/';
+  let redirect_uri = process.env.redirect_uri || 'http://localhost:3000';
+  //'https://playlist-converter-frontend.herokuapp.com/'
+  access_token = tokens.access_token;
+  console.log(access_token);
   res.redirect(redirect_uri + "?setGoogleToken=true");
 
   
@@ -72,7 +85,7 @@ app.get("/playlist-data", function(req,res){
   
   var service = google.youtube('v3');
   service.playlists.list({
-    auth : authClient,
+    auth :  'AIzaSyAYGzZDQYXnlvRSjBSyp1IuMvmIkd8U0EM',
     part : 'snippet,contentDetails',
     mine : 'true',
   }, function(err,response){

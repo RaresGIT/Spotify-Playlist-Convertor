@@ -12,8 +12,8 @@ class App extends Component{
     super();
     this.state={
       spotifyApiURI: "https://playlist-converter-spotify.herokuapp.com",
-      googleApiURI: "https://playlist-converter-google.herokuapp.com",
-      defaultURI: "https://playlist-converter-frontend.herokuapp.com"
+      googleApiURI: "http://localhost:8889",
+      defaultURI: "http://localhost:3000"
     }
   }
 

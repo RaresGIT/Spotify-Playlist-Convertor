@@ -14,10 +14,10 @@
     "body-parser": "^1.19.0",
     "cors": "^2.8.5",
     "express": "^4.15.4",
+    "express-session": "^1.17.1",
     "googleapis": "^61.0.0",
     "node-fetch": "^2.6.1",
     "query-string": "^6.13.7"
   },
-  "devDependencies": {
-  }
+  "devDependencies": {}
 }
