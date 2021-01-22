@@ -34,7 +34,7 @@ to backend through REST
 - [ ] sonarqube
 - [ ] gitlab ci + Docker deployment
 - [ ] OWASP research paper
-- [ ] UX research paper
+- [ ] UX recording
 - [ ] refactor frontend into components
 
 GP:
