@@ -8,8 +8,7 @@ var bcrypt = require("bcryptjs");
 
 let session_id_generator = 0;
 
-//hash password, for now throws an error
-//bcrypt.hashSync(req.body.password, 8)
+
 exports.signup = (req, res) => {
 
   if (req.body.username == undefined)
@@ -18,11 +17,9 @@ exports.signup = (req, res) => {
   const user = new User({
     username: req.body.username,
     email: req.body.email,
-    password: req.body.password,
+    password: bcrypt.hashSync(req.body.password, 8),
     session_id: session_id_generator
   });
-
-  console.log(req.body);
 
   session_id_generator++;
   user.save((err, user) => {

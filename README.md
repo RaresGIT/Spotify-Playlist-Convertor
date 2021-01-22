@@ -30,7 +30,7 @@ IP:
 - [ ] distributed communication (to justify DS) paper, show how frontend talks
 to backend through REST
 - [ ] test plan (all written + security and performance)
-- [ ] written tests (unit,integration and acceptance)
+- [x] written tests (unit,integration and acceptance)
 - [ ] sonarqube
 - [ ] gitlab ci + Docker deployment
 - [x] OWASP research paper
