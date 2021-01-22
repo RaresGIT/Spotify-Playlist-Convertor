@@ -33,7 +33,7 @@ to backend through REST
 - [ ] written tests (unit,integration and acceptance)
 - [ ] sonarqube
 - [ ] gitlab ci + Docker deployment
-- [ ] OWASP research paper
+- [x] OWASP research paper
 - [ ] UX recording
 - [ ] refactor frontend into components
 
