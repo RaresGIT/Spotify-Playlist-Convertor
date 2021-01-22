@@ -26,7 +26,7 @@ Requirements:
 -Document describing how these days went tie them to LOs
 
 IP:
-- [ ] research paper on frontend and backend frameworks + ORM (why i chose them)
+- [x] research paper on frontend and backend frameworks + ORM (why i chose them)
 - [ ] distributed communication (to justify DS) paper, show how frontend talks
 to backend through REST
 - [ ] test plan (all written + security and performance)
