@@ -10,7 +10,7 @@ var transporter = nodemailer.createTransport({
 
 var mailOptions = {
   from: 'nodetest@yahoo.com',
-  to: 'vlad.savu1@yahoo.ro',
+  to: 'rares.petrisor1@gmail.com',
   subject: 'Welcome to TravelMap',
   text: 'Welcome to TravelMap!'
 };
